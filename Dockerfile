@@ -1,10 +1,10 @@
-# Etapa 1 - Builder
+# Etapa 1 - Composer
 FROM composer:2 AS composer
 
-# Etapa 2 - Imagem Base PHP com Extensões
-FROM php:8.1-fpm
+# Etapa 2 - PHP com extensões
+FROM php:8.2-fpm
 
-# Argumentos opcionais para produção
+# Argumentos para criar usuário
 ARG user=laravel
 ARG uid=1000
 
@@ -31,15 +31,31 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libcurl4-openssl-dev \
     libpq-dev \
+    libicu-dev \
+    libjpeg-dev \
+    libxslt1-dev \
     supervisor \
-    nodejs \
-    npm \
-    && docker-php-ext-install pdo pdo_mysql zip gd mbstring bcmath opcache
+    ca-certificates \
+    gnupg \
+    && docker-php-ext-install \
+        pdo \
+        pdo_mysql \
+        zip \
+        gd \
+        mbstring \
+        bcmath \
+        opcache \
+        intl \
+        exif
 
-# Instala o Composer
+# Instala Node.js 18.x
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
+
+# Instala Composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-# Cria usuário não-root para rodar o app
+# Cria usuário não-root
 RUN useradd -G www-data,root -u $uid -d /home/$user $user \
     && mkdir -p /home/$user/.composer \
     && chown -R $user:$user /home/$user
@@ -47,14 +63,15 @@ RUN useradd -G www-data,root -u $uid -d /home/$user $user \
 # Define diretório de trabalho
 WORKDIR /var/www
 
-# Copia arquivos
+# Copia arquivos do projeto
 COPY . .
 
-# Instala dependências do Laravel
+# Instala dependências
 RUN composer install --no-dev --optimize-autoloader \
-    && npm install && npm run build
+    && npm install \
+    && npm run build
 
-# Permissões e cache
+# Permissões e caches Laravel
 RUN chown -R $user:www-data /var/www \
     && chmod -R 755 /var/www \
     && php artisan config:clear \
@@ -62,11 +79,11 @@ RUN chown -R $user:www-data /var/www \
     && php artisan route:cache \
     && php artisan view:cache
 
-# Porta padrão do PHP-FPM
+# Porta do PHP-FPM
 EXPOSE 9000
 
 # Define usuário
 USER $user
 
-# Comando padrão
+# Comando final
 CMD ["php-fpm"]
