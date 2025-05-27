@@ -1,10 +1,10 @@
 # Etapa 1 - Composer
 FROM composer:2 AS composer
 
-# Etapa 2 - PHP com extensões
+# Etapa 2 - PHP com extensões e ambiente de produção
 FROM php:8.2-fpm
 
-# Argumentos para criar usuário
+# Argumentos
 ARG user=laravel
 ARG uid=1000
 
@@ -14,18 +14,18 @@ ENV APP_ENV=production \
     PHP_OPCACHE_VALIDATE_TIMESTAMPS=0 \
     COMPOSER_ALLOW_SUPERUSER=1
 
-# Instala dependências do sistema
+# Instala pacotes
 RUN apt-get update && apt-get install -y \
+    nginx \
+    supervisor \
     git \
     curl \
+    unzip \
+    zip \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
     libzip-dev \
-    zip \
-    unzip \
-    cron \
-    nano \
     libonig-dev \
     libxml2-dev \
     libssl-dev \
@@ -34,9 +34,11 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libjpeg-dev \
     libxslt1-dev \
-    supervisor \
-    ca-certificates \
     gnupg \
+    cron \
+    nano \
+    nodejs \
+    npm \
     && docker-php-ext-install \
         pdo \
         pdo_mysql \
@@ -48,30 +50,26 @@ RUN apt-get update && apt-get install -y \
         intl \
         exif
 
-# Instala Node.js 18.x
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
-
 # Instala Composer
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-# Cria usuário não-root
+# Cria usuário
 RUN useradd -G www-data,root -u $uid -d /home/$user $user \
     && mkdir -p /home/$user/.composer \
     && chown -R $user:$user /home/$user
 
-# Define diretório de trabalho
+# Diretório da aplicação
 WORKDIR /var/www
 
 # Copia arquivos do projeto
 COPY . .
 
-# Instala dependências
+# Instala dependências Laravel + frontend
 RUN composer install --no-dev --optimize-autoloader \
     && npm install \
     && npm run build
 
-# Permissões e caches Laravel
+# Caches Laravel
 RUN chown -R $user:www-data /var/www \
     && chmod -R 755 /var/www \
     && php artisan config:clear \
@@ -79,12 +77,15 @@ RUN chown -R $user:www-data /var/www \
     && php artisan route:cache \
     && php artisan view:cache
 
-# Porta do PHP-FPM
-EXPOSE 9000
+# Copia configs do nginx e supervisor
+COPY ./docker/nginx.conf /etc/nginx/nginx.conf
+COPY ./docker/supervisord.conf /etc/supervisord.conf
+
+# Expor porta padrão (Render escuta em 8080)
+EXPOSE 8080
 
 # Define usuário
 USER $user
 
-# Comando final
-# CMD ["php-fpm"]
-CMD php artisan serve --host=0.0.0.0 --port=10000
+# Inicia NGINX e PHP-FPM juntos
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
