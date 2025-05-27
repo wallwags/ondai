@@ -86,4 +86,5 @@ EXPOSE 9000
 USER $user
 
 # Comando final
-CMD ["php-fpm"]
+# CMD ["php-fpm"]
+CMD php artisan serve --host=0.0.0.0 --port=10000
