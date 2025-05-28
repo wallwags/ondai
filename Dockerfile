@@ -91,6 +91,7 @@ RUN test -f /etc/supervisord.conf || (echo "supervisord.conf não encontrado!" &
 
 # Garante que diretório de logs do Nginx existe
 RUN mkdir -p /var/log/nginx
+RUN nginx -t
 
 # Inicia NGINX e PHP-FPM juntos
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
