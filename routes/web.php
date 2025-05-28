@@ -20,3 +20,6 @@ Wave::routes();
 Route::get('/', function () {
     return 'Hello from Laravel on Render!';
 });
+Route::get('/show-log', function () {
+    return nl2br(file_get_contents(storage_path('logs/laravel.log')));
+});
