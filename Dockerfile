@@ -94,4 +94,7 @@ RUN mkdir -p /var/log/nginx
 
 
 # Inicia NGINX e PHP-FPM juntos
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+#CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "public"]
+
