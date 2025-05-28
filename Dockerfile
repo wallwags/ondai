@@ -88,4 +88,5 @@ EXPOSE 8080
 USER $user
 
 # Inicia NGINX e PHP-FPM juntos
+RUN mkdir -p /var/log/nginx
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
