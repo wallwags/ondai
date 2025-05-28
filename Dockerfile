@@ -86,7 +86,11 @@ EXPOSE 8080
 
 # Define usuário
 USER $user
+# Verifica supervisord.conf
+RUN test -f /etc/supervisord.conf || (echo "supervisord.conf não encontrado!" && exit 1)
+
+# Garante que diretório de logs do Nginx existe
+RUN mkdir -p /var/log/nginx
 
 # Inicia NGINX e PHP-FPM juntos
-RUN mkdir -p /var/log/nginx
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
