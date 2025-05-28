@@ -16,3 +16,7 @@ use Wave\Facades\Wave;
 
 // Wave routes
 Wave::routes();
+
+Route::get('/', function () {
+    return 'Hello from Laravel on Render!';
+});
