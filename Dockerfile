@@ -83,7 +83,7 @@ COPY ./docker/supervisord.conf /etc/supervisord.conf
 
 # Expor porta padrão (Render escuta em 8080)
 EXPOSE 8080
-
+RUN nginx -t
 # Define usuário
 USER $user
 # Verifica supervisord.conf
@@ -91,7 +91,7 @@ RUN test -f /etc/supervisord.conf || (echo "supervisord.conf não encontrado!" &
 
 # Garante que diretório de logs do Nginx existe
 RUN mkdir -p /var/log/nginx
-RUN nginx -t
+
 
 # Inicia NGINX e PHP-FPM juntos
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
