@@ -94,6 +94,9 @@ COPY ./docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 EXPOSE 8080
 
 RUN mkdir -p /var/log/supervisor && chown -R $user:$user /var/log/supervisor
+RUN mkdir -p /var/run && chown -R $user:$user /var/run
+
+
 # =========================
 # Troca para o usuário laravel para rodar a aplicação com segurança
 # =========================
