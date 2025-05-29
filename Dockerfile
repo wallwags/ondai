@@ -48,7 +48,7 @@ RUN useradd -m -d /home/$user -s /bin/bash -u $uid $user
 # =========================
 # Define diretório de trabalho para o Laravel dentro do container
 # =========================
-WORKDIR /var/www/html
+WORKDIR /var/www
 
 # =========================
 # Copia todos os arquivos do projeto para dentro do container
