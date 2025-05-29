@@ -2,7 +2,7 @@
 FROM composer:2 AS composer
 
 # Etapa 2: Usa imagem oficial do PHP com FPM (sem nginx)
-FROM php:8.2-cli
+FROM php:8.2-fpm
 
 # Define argumentos (opcionais, mas úteis)
 ARG user=laravel
