@@ -98,6 +98,8 @@ EXPOSE 8080
 # =========================
 USER $user
 
+RUN mkdir -p /var/log/supervisor && chown -R $user:$user /var/log/supervisor
+
 # =========================
 # Comando de inicialização:
 # Usa o supervisord para rodar php-fpm e nginx juntos em primeiro plano
