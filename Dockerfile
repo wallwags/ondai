@@ -78,7 +78,7 @@ RUN php artisan config:clear && \
 # Ajusta permissões para que o usuário laravel e grupo www-data tenham acesso
 # Especialmente em storage e bootstrap/cache, que precisam ser graváveis
 # =========================
-RUN chown -R $user:www-data /var/www/html && chmod -R 755 /var/www/html
+RUN chown -R $user:www-data /var/www && chmod -R 755 /var/www
 RUN chown -R $user:www-data storage bootstrap/cache && chmod -R 775 storage bootstrap/cache
 
 # =========================
@@ -95,6 +95,7 @@ EXPOSE 8080
 
 RUN mkdir -p /var/log/supervisor && chown -R $user:$user /var/log/supervisor
 RUN mkdir -p /var/run && chown -R $user:$user /var/run
+RUN mkdir -p /var/run && chown -R laravel:laravel /var/run
 
 
 # =========================
